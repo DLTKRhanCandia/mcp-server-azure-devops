@@ -11,6 +11,7 @@ export * from './manage-work-item-link';
 export * from './upload-work-item-attachment';
 export * from './download-work-item-attachment';
 export * from './list-work-item-attachments';
+export * from './get-work-item-comments';
 
 // Export tool definitions
 export * from './tool-definitions';
@@ -32,6 +33,7 @@ import {
   UploadWorkItemAttachmentSchema,
   DownloadWorkItemAttachmentSchema,
   ListWorkItemAttachmentsSchema,
+  GetWorkItemCommentsSchema,
   listWorkItems,
   getWorkItem,
   createWorkItem,
@@ -40,6 +42,7 @@ import {
   uploadWorkItemAttachment,
   downloadWorkItemAttachment,
   listWorkItemAttachments,
+  getWorkItemComments,
 } from './';
 
 // Define the response type based on observed usage
@@ -63,6 +66,7 @@ export const isWorkItemsRequest: RequestIdentifier = (
     'upload_work_item_attachment',
     'download_work_item_attachment',
     'list_work_item_attachments',
+    'get_work_item_comments',
   ].includes(toolName);
 };
 
@@ -196,6 +200,20 @@ export const handleWorkItemsRequest: RequestHandler = async (
         connection,
         args.workItemId,
         args.projectId ?? defaultProject,
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+      };
+    }
+    case 'get_work_item_comments': {
+      const args = GetWorkItemCommentsSchema.parse(request.params.arguments);
+      const result = await getWorkItemComments(
+        connection,
+        args.workItemId,
+        args.projectId ?? defaultProject,
+        args.top,
+        args.continuationToken,
+        args.order,
       );
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],

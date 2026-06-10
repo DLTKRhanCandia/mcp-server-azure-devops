@@ -212,3 +212,23 @@ export const ListWorkItemAttachmentsSchema = z.object({
     .optional()
     .describe(`The ID or name of the project (Default: ${defaultProject})`),
 });
+
+/**
+ * Schema for getting work item comments
+ */
+export const GetWorkItemCommentsSchema = z.object({
+  workItemId: z.number().describe('The ID of the work item'),
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+  top: z.number().optional().describe('Maximum number of comments to return'),
+  continuationToken: z
+    .string()
+    .optional()
+    .describe('Token for retrieving the next page of comments'),
+  order: z
+    .enum(['asc', 'desc'])
+    .optional()
+    .describe('Sort order for comments by creation date (default: asc)'),
+});
