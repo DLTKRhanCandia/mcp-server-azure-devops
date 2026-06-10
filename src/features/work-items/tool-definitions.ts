@@ -9,6 +9,7 @@ import {
   UploadWorkItemAttachmentSchema,
   DownloadWorkItemAttachmentSchema,
   ListWorkItemAttachmentsSchema,
+  GetWorkItemCommentsSchema,
 } from './schemas';
 
 /**
@@ -59,5 +60,11 @@ export const workItemsTools: ToolDefinition[] = [
     description:
       'List all attachments on a work item, including their IDs, names, and sizes.',
     inputSchema: zodToJsonSchema(ListWorkItemAttachmentsSchema),
+  },
+  {
+    name: 'get_work_item_comments',
+    description:
+      'Get comments on a work item, including author, date, and text of each comment.',
+    inputSchema: zodToJsonSchema(GetWorkItemCommentsSchema),
   },
 ];
