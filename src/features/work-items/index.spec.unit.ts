@@ -24,6 +24,11 @@ jest.mock('./manage-work-item-link', () => ({
   manageWorkItemLink: jest.fn(),
 }));
 
+jest.mock('./update-work-item-comment', () => ({
+  updateWorkItemComment: jest.fn(),
+  UpdateWorkItemCommentSchema: { parse: jest.fn() },
+}));
+
 // Helper function to create a valid CallToolRequest object
 const createCallToolRequest = (name: string, args: any): CallToolRequest => {
   return {
@@ -44,6 +49,7 @@ describe('Work Items Request Handlers', () => {
         'create_work_item',
         'update_work_item',
         'manage_work_item_link',
+        'update_work_item_comment',
       ];
 
       workItemsRequests.forEach((name) => {
@@ -123,6 +129,24 @@ describe('Work Items Request Handlers', () => {
       jest
         .spyOn(workItemModule, 'manageWorkItemLink')
         .mockResolvedValue({ id: 123 });
+
+      jest
+        .spyOn(workItemModule.UpdateWorkItemCommentSchema, 'parse')
+        .mockImplementation(() => {
+          return {
+            workItemId: 299,
+            commentId: 50,
+            text: 'Updated text',
+            projectId: 'TestProject',
+          };
+        });
+
+      jest.spyOn(workItemModule, 'updateWorkItemComment').mockResolvedValue({
+        id: 50,
+        text: 'Updated text',
+        workItemId: 299,
+        version: 2,
+      });
     });
 
     afterEach(() => {
@@ -229,6 +253,45 @@ describe('Work Items Request Handlers', () => {
       expect(workItemModule.manageWorkItemLink).toHaveBeenCalled();
       expect(result).toEqual({
         content: [{ type: 'text', text: JSON.stringify({ id: 123 }, null, 2) }],
+      });
+    });
+
+    it('should handle update_work_item_comment requests', async () => {
+      const request = createCallToolRequest('update_work_item_comment', {
+        workItemId: 299,
+        commentId: 50,
+        text: 'Updated text',
+        projectId: 'TestProject',
+      });
+
+      const result = await handleWorkItemsRequest(mockConnection, request);
+
+      expect(
+        workItemModule.UpdateWorkItemCommentSchema.parse,
+      ).toHaveBeenCalledWith({
+        workItemId: 299,
+        commentId: 50,
+        text: 'Updated text',
+        projectId: 'TestProject',
+      });
+      expect(workItemModule.updateWorkItemComment).toHaveBeenCalledWith(
+        mockConnection,
+        299,
+        50,
+        'Updated text',
+        'TestProject',
+      );
+      expect(result).toEqual({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(
+              { id: 50, text: 'Updated text', workItemId: 299, version: 2 },
+              null,
+              2,
+            ),
+          },
+        ],
       });
     });
 

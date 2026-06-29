@@ -232,3 +232,16 @@ export const GetWorkItemCommentsSchema = z.object({
     .optional()
     .describe('Sort order for comments by creation date (default: asc)'),
 });
+
+/**
+ * Schema for updating a work item comment
+ */
+export const UpdateWorkItemCommentSchema = z.object({
+  workItemId: z.number().describe('The ID of the work item'),
+  commentId: z.number().describe('The ID of the comment to update'),
+  text: z.string().describe('The updated text of the comment'),
+  projectId: z
+    .string()
+    .optional()
+    .describe(`The ID or name of the project (Default: ${defaultProject})`),
+});
